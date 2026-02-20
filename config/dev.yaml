@@ -1,0 +1,27 @@
+# =============================================================
+# NEXXI - Development Environment Overrides
+# These values override config.yaml in development mode
+# =============================================================
+
+model:
+  quantization: "none"     # Skip quantization in dev for faster startup
+  max_new_tokens: 256      # Shorter responses for faster iteration
+  temperature: 0.8
+
+conversation:
+  session_timeout_minutes: 60   # Longer sessions during development
+
+api:
+  rate_limit: "200/minute"      # Higher rate limit for dev/testing
+  cors_origins:
+    - "http://localhost:3000"
+    - "http://localhost:5173"
+    - "http://localhost:8080"
+    - "http://127.0.0.1:3000"
+
+logging:
+  level: "DEBUG"
+  format: "text"               # Human-readable in dev
+
+security:
+  enable_content_moderation: false  # Disable for faster dev iteration

@@ -1,0 +1,175 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Base ─────────────────────────────────────────────────── */
+@layer base {
+  * {
+    @apply box-border;
+  }
+
+  html, body, #root {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    @apply bg-nexxi-bg-primary text-nexxi-text-primary font-sans antialiased;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar        { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track  { background: transparent; }
+  ::-webkit-scrollbar-thumb  {
+    @apply bg-nexxi-border rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-nexxi-border-light;
+  }
+
+  /* Selection */
+  ::selection {
+    background: rgba(124, 58, 237, 0.4);
+    color: #F8FAFC;
+  }
+}
+
+/* ── Components ───────────────────────────────────────────── */
+@layer components {
+
+  /* Glass card */
+  .glass {
+    background: rgba(18, 18, 26, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    @apply border border-nexxi-border;
+  }
+
+  .glass-heavy {
+    background: rgba(10, 10, 15, 0.92);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    @apply border border-nexxi-border;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, #7C3AED 0%, #06B6D4 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Nexxi glow button */
+  .btn-nexxi {
+    background: linear-gradient(135deg, #7C3AED 0%, #06B6D4 100%);
+    @apply text-white font-semibold rounded-xl px-4 py-2 transition-all duration-200;
+    box-shadow: 0 0 20px rgba(124, 58, 237, 0.3);
+  }
+  .btn-nexxi:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 35px rgba(124, 58, 237, 0.55);
+  }
+  .btn-nexxi:active {
+    transform: translateY(0) scale(0.97);
+  }
+  .btn-nexxi:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* Input */
+  .nexxi-input {
+    @apply bg-nexxi-bg-tertiary border border-nexxi-border rounded-xl px-4 py-3
+           text-nexxi-text-primary placeholder-nexxi-text-muted
+           focus:outline-none focus:border-nexxi-accent transition-all duration-200;
+  }
+  .nexxi-input:focus {
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+  }
+
+  /* Chat bubble — user */
+  .bubble-user {
+    background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%);
+    box-shadow: 0 4px 20px rgba(124, 58, 237, 0.3);
+    @apply text-white rounded-2xl rounded-tr-sm px-4 py-3;
+  }
+
+  /* Chat bubble — bot */
+  .bubble-bot {
+    @apply bg-nexxi-bot-bubble text-nexxi-text-primary rounded-2xl rounded-tl-sm px-4 py-3;
+    border-left: 2px solid #06B6D4;
+  }
+
+  /* Grid background */
+  .bg-grid {
+    background-image:
+      linear-gradient(rgba(45, 45, 61, 0.3) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(45, 45, 61, 0.3) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  /* Sidebar item */
+  .sidebar-item {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer
+           transition-all duration-200 text-nexxi-text-secondary;
+  }
+  .sidebar-item:hover {
+    @apply bg-nexxi-bg-tertiary text-nexxi-text-primary;
+  }
+  .sidebar-item.active {
+    @apply bg-nexxi-accent/20 text-nexxi-accent border border-nexxi-accent/30;
+  }
+}
+
+/* ── Utilities ────────────────────────────────────────────── */
+@layer utilities {
+  .glow-nexxi   { box-shadow: 0 0 20px rgba(124, 58, 237, 0.35); }
+  .glow-cyan    { box-shadow: 0 0 20px rgba(6, 182, 212, 0.35); }
+  .glow-error   { box-shadow: 0 0 20px rgba(239, 68, 68, 0.35); }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+}
+
+/* ── Prose overrides (react-markdown) ────────────────────── */
+.nexxi-prose {
+  @apply text-nexxi-text-primary text-sm leading-relaxed;
+}
+.nexxi-prose code {
+  @apply font-mono text-xs bg-nexxi-bg-primary px-1.5 py-0.5 rounded;
+  color: #06B6D4;
+}
+.nexxi-prose pre {
+  @apply bg-nexxi-bg-primary border border-nexxi-border rounded-xl p-4 my-3 overflow-x-auto;
+}
+.nexxi-prose pre code {
+  @apply bg-transparent p-0 text-xs;
+  color: inherit;
+}
+.nexxi-prose p   { @apply mb-3 last:mb-0; }
+.nexxi-prose ul  { @apply list-disc list-inside mb-3 space-y-1; }
+.nexxi-prose ol  { @apply list-decimal list-inside mb-3 space-y-1; }
+.nexxi-prose h1,
+.nexxi-prose h2,
+.nexxi-prose h3 { @apply font-semibold text-nexxi-text-primary mb-2 mt-4 first:mt-0; }
+.nexxi-prose h1 { @apply text-lg; }
+.nexxi-prose h2 { @apply text-base; }
+.nexxi-prose h3 { @apply text-sm; }
+.nexxi-prose blockquote {
+  @apply border-l-2 border-nexxi-accent pl-4 text-nexxi-text-secondary italic;
+}
+.nexxi-prose strong { @apply text-nexxi-text-primary font-semibold; }
+.nexxi-prose a {
+  @apply text-nexxi-cyan underline;
+}

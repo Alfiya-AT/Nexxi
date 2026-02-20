@@ -1,0 +1,22 @@
+# =============================================================
+# NEXXI - Staging Environment Overrides
+# Mirror of production with relaxed monitoring thresholds
+# =============================================================
+
+model:
+  quantization: "4bit"
+  max_new_tokens: 512
+
+api:
+  rate_limit: "120/minute"
+  cors_origins:
+    - "https://staging.yourdomain.com"
+    - "https://api-staging.yourdomain.com"
+
+logging:
+  level: "INFO"
+  format: "json"
+
+security:
+  enable_content_moderation: true
+  enable_pii_detection: true

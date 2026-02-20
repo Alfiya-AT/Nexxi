@@ -1,0 +1,13 @@
+# Prometheus configuration for Nexxi
+# docker/prometheus.yml
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: "nexxi-app"
+    static_configs:
+      - targets: ["nexxi-app:8000"]
+    metrics_path: "/metrics"
+    scrape_interval: 10s

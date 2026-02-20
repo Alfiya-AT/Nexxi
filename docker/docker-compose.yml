@@ -1,0 +1,138 @@
+# =============================================================
+# Nexxi - Docker Compose (Development / Local Stack)
+# =============================================================
+#
+# Services:
+#   nexxi-app   → Nexxi chatbot API (port 8000)
+#   redis       → Session and response cache (port 6379)
+#   postgres    → Conversation storage (port 5432)
+#   prometheus  → Metrics collection (port 9090)
+#   grafana     → Metrics dashboard (port 3001)
+#
+# Usage:
+#   docker compose --env-file ../.env up
+#
+# NEVER hardcode credentials here. All secrets come from .env
+# =============================================================
+
+version: "3.9"
+
+services:
+
+  # ── Nexxi Application ──────────────────────────────────────
+  nexxi-app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: nexxi-app
+    ports:
+      - "8000:8000"
+    env_file:
+      - ../.env   # All secrets from .env — never hardcoded
+    environment:
+      - APP_ENV=development
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s   # Give model time to load
+    networks:
+      - nexxi-net
+    restart: unless-stopped
+    volumes:
+      # Cache HF models to avoid re-downloading on restart
+      - huggingface-cache:/root/.cache/huggingface
+
+  # ── Redis ──────────────────────────────────────────────────
+  redis:
+    image: redis:7.2-alpine
+    container_name: nexxi-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nexxi-net
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+
+  # ── PostgreSQL ──────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: nexxi-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      # Values from .env — never hardcoded here
+      POSTGRES_DB: ${POSTGRES_DB:-nexxi_db}
+      POSTGRES_USER: ${POSTGRES_USER:-nexxi}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-nexxi}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nexxi-net
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  # ── Prometheus ──────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:v2.52.0
+    container_name: nexxi-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=15d'
+      - '--web.enable-lifecycle'
+    networks:
+      - nexxi-net
+    restart: unless-stopped
+
+  # ── Grafana ─────────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:10.4.0
+    container_name: nexxi-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - nexxi-net
+    restart: unless-stopped
+
+# ── Volumes ────────────────────────────────────────────────────
+volumes:
+  redis-data:
+  postgres-data:
+  prometheus-data:
+  grafana-data:
+  huggingface-cache:
+
+# ── Networks ───────────────────────────────────────────────────
+networks:
+  nexxi-net:
+    driver: bridge

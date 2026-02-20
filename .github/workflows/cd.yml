@@ -1,0 +1,48 @@
+name: Nexxi CD Pipeline
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'    # Trigger on semantic version tags (e.g. v1.0.0)
+
+jobs:
+
+  deploy:
+    name: "Deploy to Production"
+    runs-on: ubuntu-latest
+    environment: production   # Requires manual approval gate
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract version tag
+        id: meta
+        run: echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Deploy via SSH
+        # Real deployment: SSH to server and pull latest image
+        # Replace with your actual deployment mechanism (Helm, Ansible, etc.)
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            cd /opt/nexxi
+            docker compose pull nexxi-app
+            docker compose up -d --no-deps nexxi-app
+            docker image prune -f
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          tag_name: ${{ steps.meta.outputs.version }}

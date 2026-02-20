@@ -1,0 +1,65 @@
+# =============================================================
+# NEXXI - Main Configuration
+# Sensitive values are loaded from environment variables
+# Format: ${ENV_VAR_NAME} will be resolved at runtime
+# =============================================================
+
+nexxi:
+  name: "Nexxi"
+  version: "1.0.0"
+  description: "Next-gen AI chatbot powered by Hugging Face"
+  tagline: "Next-gen answers, right now."
+
+# ── Model Configuration ───────────────────────────────────────
+model:
+  name: "mistralai/Mistral-7B-Instruct-v0.3"  # Override via HF_MODEL_NAME env var
+  device: "auto"           # auto | cuda | cpu — 'auto' prefers GPU then falls back to CPU
+  quantization: "4bit"     # 4bit | 8bit | none — 4bit recommended for A100/H100/consumer GPU
+  max_new_tokens: 512      # Max tokens in generated response
+  temperature: 0.7         # Sampling temperature (0.0 = deterministic, 1.0 = creative)
+  top_p: 0.9               # Nucleus sampling threshold
+  top_k: 50                # Top-K sampling (disabled when top_p is used)
+  repetition_penalty: 1.1  # Penalise repeated phrases (>1.0 discourages repetition)
+  do_sample: true          # Enables stochastic sampling (false = greedy decoding)
+  stream: true             # Server-Sent Events streaming by default
+
+# ── Conversation Memory ───────────────────────────────────────
+conversation:
+  max_history_turns: 10            # Number of (user, assistant) exchange pairs to retain
+  max_context_tokens: 4096         # Hard cap before summarization kicks in
+  session_timeout_minutes: 30      # Redis TTL for inactive sessions
+  summarize_after_turns: 8         # Trigger summarization after N turns
+
+# ── Safety & Content Moderation ──────────────────────────────
+security:
+  max_input_length: 1000           # Characters — prevents prompt stuffing
+  enable_content_moderation: true  # Use HF moderation model for output safety
+  enable_pii_detection: true       # Detect and redact PII in logs
+  blocked_topics:
+    - "violence"
+    - "illegal activities"
+    - "self harm"
+    - "hate speech"
+    - "explicit content"
+
+# ── API Settings ──────────────────────────────────────────────
+api:
+  version: "v1"
+  rate_limit: "60/minute"       # Per-API-key rate limit
+  max_request_size_kb: 50       # Reject payloads over this size
+  cors_origins:
+    - "http://localhost:3000"   # Local frontend dev
+    - "http://localhost:8080"
+    - "https://yourdomain.com"  # Replace with your actual domain
+
+# ── Logging ───────────────────────────────────────────────────
+logging:
+  level: "INFO"            # Override via LOG_LEVEL env var
+  format: "json"           # json | text — json preferred for log aggregators
+  retention_days: 30       # Log file retention (for file-based logs)
+
+# ── Cache ─────────────────────────────────────────────────────
+cache:
+  response_ttl_seconds: 300   # Cache identical responses for 5 minutes
+  session_prefix: "nexxi:session:"
+  response_prefix: "nexxi:response:"

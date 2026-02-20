@@ -1,0 +1,27 @@
+# =============================================================
+# NEXXI - Production Environment Overrides
+# Tightest security, strictest rate limits, JSON logging
+# =============================================================
+
+model:
+  quantization: "4bit"
+  max_new_tokens: 512
+  temperature: 0.7
+
+conversation:
+  session_timeout_minutes: 30
+
+api:
+  rate_limit: "60/minute"
+  cors_origins:
+    - "https://yourdomain.com"
+    - "https://api.yourdomain.com"
+
+logging:
+  level: "WARNING"
+  format: "json"
+
+security:
+  enable_content_moderation: true
+  enable_pii_detection: true
+  max_input_length: 1000
