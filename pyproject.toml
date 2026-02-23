@@ -21,6 +21,9 @@ classifiers = [
 ]
 dependencies = []  # Managed via requirements.txt for pinned reproducibility
 
+[tool.setuptools.packages.find]
+include = ["app*"]  # Only discover the 'app' package; ignore config/, docker/, frontend/, etc.
+
 [project.urls]
 Homepage = "https://github.com/your-org/nexxi"
 Documentation = "https://nexxi.ai/docs"
